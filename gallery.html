@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Memories Gallery</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.gallery { margin:0; background:linear-gradient(180deg,#fffaf6,#fff7f0); font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color:#222; }
+    .wrap { max-width:1100px; margin:30px auto; padding:20px; position:relative; z-index:2; }
+    h1{ text-align:center; color:#6b3b0f; margin:6px 0; }
+    p.lead{ text-align:center; color:#7a5a3f; margin-top:0; }
+    .slideshow { margin-top:18px; position:relative; height:520px; border-radius:14px; overflow:hidden; box-shadow:0 16px 40px rgba(90,50,20,0.08); background:#fff; }
+    .slide { position:absolute; inset:0; opacity:0; transition: opacity 1s ease; display:flex; align-items:center; justify-content:center; }
+    .slide img { max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; display:block; }
+    .slide.active { opacity:1; }
+    .back { text-align:center; margin:28px 0 60px; }
+    .back a { background: linear-gradient(90deg,#ffd9a8,#ffefde); padding:12px 20px; border-radius:999px; color:#6b3b0f; text-decoration:none; box-shadow:0 6px 18px rgba(200,150,80,0.12); font-weight:600; }
+    #particles { position:fixed; inset:0; z-index:1; pointer-events:none; }
+  
+    .greeting-card{
+      margin:40px auto 70px;
+      max-width:720px;
+      padding:24px 20px;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 18px 40px rgba(90,50,20,0.12);
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+      animation:cardPop 0.9s ease-out 0.4s both;
+    }
+    .greeting-card::before,
+    .greeting-card::after{
+      content:'';
+      position:absolute;
+      width:160px;
+      height:160px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, rgba(255,210,160,0.9), rgba(255,160,200,0.1));
+      opacity:0.7;
+      pointer-events:none;
+      animation:cardFloat 6s ease-in-out infinite;
+    }
+    .greeting-card::before{
+      top:-40px;
+      left:-30px;
+    }
+    .greeting-card::after{
+      bottom:-30px;
+      right:-40px;
+      animation-delay:-3s;
+    }
+    .greeting-card h2{
+      position:relative;
+      margin:0 0 8px;
+      font-size:clamp(22px,4vw,28px);
+      color:#6b3b0f;
+      letter-spacing:0.03em;
+    }
+    .greeting-card p{
+      position:relative;
+      margin:0;
+      font-size:17px;
+      line-height:1.6;
+      color:#5a3a20;
+    }
+    @keyframes cardPop{
+      0%{ transform:translateY(24px) scale(0.96); opacity:0; }
+      100%{ transform:none; opacity:1; }
+    }
+    @keyframes cardFloat{
+      0%{ transform:translate3d(0,0,0); }
+      50%{ transform:translate3d(8px,-6px,0); }
+      100%{ transform:translate3d(0,0,0); }
+    }
+
+    /* Music button top-right */
+    #musicToggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      padding: 10px 14px;
+      font-size: 14px;
+      background: linear-gradient(90deg,#ffd9a8,#ffb0c8);
+      border: none;
+      border-radius: 8px;
+      box-shadow:0 6px 16px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 50;
+    }
+</style>
+</head>
+<body class="gallery">
+  <button id="musicToggle">Music 🎵</button>
+  <canvas id="particles"></canvas>
+  <div class="wrap">
+    <h1>Memories Gallery</h1>
+    <p class="lead">A collection of moments-press the music button — stay back and enjoy the slideshow.</p>
+
+    <div class="slideshow" id="slideshow" aria-live="polite" aria-label="Memories slideshow"></div>
+
+    <div class="back"><a id="backHome" href="index.html">Back to Home ❤️</a></div>
+    <div class="greeting-card">
+      <h2>Greeting Card</h2>
+      <p>Happy Birthday Deepti ❤️ May your day be filled with smiles, memories and endless happiness.</p>
+    </div>
+
+  </div>
+
+  <audio id="bg-music" src="assets/sang_rahiyo.mp3" preload="auto" loop></audio>
+
+  <script src="script.js"></script>
+  <script>
+  (function(){
+    // Image list
+    var photos = [
+      'assets/IMG20250327200055.jpg','assets/number2.jpg','assets/number3.jpg','assets/number4.jpg','assets/number5.jpg',
+      'assets/number6.jpg','assets/number7.jpg','assets/number8.jpg','./assets/number 10.jpg','assets/number 9.jpg',
+      'assets/number 11.jpg','assets/number 12.jpg','assets/number 13.jpg','assets/number 14.jpg','assets/number 15.jpeg','assets/number 16.jpeg',
+      'assets/number 17.jpg','assets/number 18.jpg','assets/number 19.jpg',
+    ];
+
+    var slideshow = document.getElementById('slideshow');
+    var audio = document.getElementById('bg-music');
+    var musicBtn = document.getElementById('musicToggle');
+
+    // Music toggle button (top-right)
+    if(musicBtn && audio){
+      musicBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        if(audio.paused){
+          audio.play().catch(function(){});
+          musicBtn.textContent = "Pause 🔇";
+        } else {
+          audio.pause();
+          musicBtn.textContent = "Music 🎵";
+        }
+      });
+    }
+
+    var slides = [];
+    var duration = 5000; // 5s per image
+
+    function preloadAll(list, cb){
+      var loaded = 0;
+      if(!list.length) cb();
+      list.forEach(function(src){
+        var img = new Image();
+        img.onload = img.onerror = function(){
+          loaded++;
+          if(loaded === list.length) cb();
+        };
+        img.src = src;
+      });
+    }
+
+    function buildSlides(){
+      photos.forEach(function(src, i){
+        var s = document.createElement('div');
+        s.className = 'slide';
+        var img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Memory ' + (i+1);
+        s.appendChild(img);
+        slideshow.appendChild(s);
+        slides.push(s);
+      });
+      if(slides.length) slides[0].classList.add('active');
+    }
+
+    function startSlideshow(){
+      if(!slides.length) return;
+      var idx = 0;
+      setInterval(function(){
+        slides[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+      }, duration);
+    }
+
+    // First user click anywhere also starts music (in case browser blocks autoplay)
+    if(audio){
+      document.addEventListener('click', function once(){
+        if(audio.paused){
+          audio.play().catch(function(){});
+          if(musicBtn) musicBtn.textContent = "Pause 🔇";
+        }
+        document.removeEventListener('click', once);
+      });
+    }
+
+    // Preload then start slideshow
+    preloadAll(photos, function(){
+      buildSlides();
+      startSlideshow();
+    });
+
+// Particles (subtle)
+    (function(){
+      var c = document.getElementById('particles'), ctx = c.getContext('2d');
+      var w,h,parts=[]; function resize(){ w=c.width=innerWidth; h=c.height=innerHeight; } window.addEventListener('resize', resize); resize();
+      function rand(a,b){ return Math.random()*(b-a)+a; }
+      function P(){ this.x=rand(0,w); this.y=rand(h*0.35,h+60); this.r=rand(0.6,2.2); this.vx=rand(-0.08,0.08); this.vy=rand(-0.02,-0.12); this.a=rand(0.12,0.45); }
+      for(var i=0;i<70;i++) parts.push(new P());
+      function d(){ ctx.clearRect(0,0,w,h); for(var i=0;i<parts.length;i++){ var p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.a = 0.25 + 0.18*Math.sin((i+Date.now()/1000)*0.6); if(p.y < -10 || p.x < -50 || p.x > w+50){ parts[i] = new P(); parts[i].y = h + 10; } ctx.beginPath(); ctx.fillStyle = 'rgba(255,210,140,'+p.a+')'; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); } requestAnimationFrame(d); } d();
+    })();
+
+
+  })();
+  </script>
+</body>
+</html>

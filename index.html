@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deepti - Welcome</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Landing-specific */
+    .landing-hero { min-height:80vh; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:40px 20px; }
+    .landing-hero h1 { font-size: clamp(28px,6vw,56px); margin:0 0 12px; color:#6b3b0f; }
+    .landing-hero p { color:#7a5a3f; margin:6px 0 18px; }
+    .countdown { font-weight:700; font-size:22px; color:#5a3a20; }
+    .controls { display:flex; gap:12px; align-items:center; justify-content:center; margin-top:18px; }
+    .music-btn { background: linear-gradient(90deg,#ffd9a8,#ffefde); border-radius:50px; padding:10px 14px; cursor:pointer; box-shadow:0 8px 20px rgba(200,150,80,0.12); border:none; font-weight:700; color:#6b3b0f; }
+    .start-note { margin-top:10px; color:#6b3b0f; font-size:14px; opacity:0.95; }
+</style>
+</head>
+<body class="landing-page">
+  <main class="landing-hero" role="main" aria-label="Landing">
+    <h1>Happy Birthday My Favourite Person 🎉</h1>
+    <p>Press the open Surprise to get the suprise or wait 10 second</p>
+    <div class="controls">
+      <button id="musicControl" class="music-btn" aria-pressed="false">Play Music</button>
+    </div>
+    <p class="start-note">Starting in <span id="landingCountdown" class="countdown">10</span> seconds...</p>
+    <div style="margin-top:20px; font-size:13px; color:#7a5a3f;">Or click the heart to jump straight in ❤️</div>
+    <!-- heart fallback preserved if original page has heart svg -->
+    <div style="margin-top:20px;">
+      <button id="heartBtn" class="music-btn" style="background:#ffe7f0; color:#9b2f5b;">♡ Open Surprise</button>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+  // Landing logic: 10s countdown + heart button to open surprise (no background music here)
+  (function(){
+    var countdown = 10;
+    var el = document.getElementById('landingCountdown');
+    var heartBtn = document.getElementById('heartBtn');
+
+    function updateDisplay(){
+      el.textContent = countdown;
+      if (countdown <= 0){
+        window.location.href = 'transition.html';
+      }
+    }
+    setInterval(function(){
+      countdown--;
+      updateDisplay();
+    }, 1000);
+
+    heartBtn.addEventListener('click', function(){
+      window.location.href = 'transition.html';
+    });
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Come to Our Memories Gallery</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.transition { margin:0; height:100vh; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg,#fff9f2,#fff7ee); color:#2b2b2b; overflow:hidden; }
+    .box { text-align:center; z-index:2; }
+    .title { font-size:clamp(24px,5vw,44px); color:#6b3b0f; margin:0; opacity:0; transform:translateY(8px); animation:fadeUp .8s forwards; }
+    .sub { margin-top:10px; color:#6b3b0f; opacity:0; animation:fadeUp .8s forwards .3s; }
+    .count { margin-top:12px; font-weight:700; color:#5a3a20; opacity:0; animation:fadeUp .8s forwards .6s; }
+    @keyframes fadeUp { to { opacity:1; transform:none; } }
+    #particles { position:fixed; inset:0; z-index:1; pointer-events:none; }
+</style>
+</head>
+<body class="transition">
+  <canvas id="particles"></canvas>
+  <div class="box">
+    <h1 class="title">Come to Our Memories Gallery 💫</h1>
+    <p class="sub">Collecting  our sweet moments...</p>
+    <div class="count">Opening in <span id="transCount">10</span> seconds</div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+  (function(){
+    var seconds = 10;
+    var el = document.getElementById('transCount');
+
+    var timer = setInterval(function(){
+      seconds--;
+      el.textContent = seconds;
+      if(seconds<=0){
+        clearInterval(timer);
+        document.body.style.transition = 'opacity .8s';
+        document.body.style.opacity = 0;
+        setTimeout(function(){ window.location.href = 'gallery.html'; }, 900);
+      }
+    },1000);
+  })();
+
+
+  // Subtle particles
+  (function(){
+    var c = document.getElementById('particles'), ctx = c.getContext('2d');
+    var w,h,parts=[]; function resize(){ w=c.width=innerWidth; h=c.height=innerHeight; } window.addEventListener('resize', resize); resize();
+    function rand(a,b){ return Math.random()*(b-a)+a; }
+    function P(){ this.x=rand(0,w); this.y=rand(0,h); this.r=rand(0.7,2.4); this.vx=rand(-0.12,0.12); this.vy=rand(-0.04,-0.2); this.a=rand(0.12,0.52); }
+    for(var i=0;i<80;i++) parts.push(new P());
+    function d(){ ctx.clearRect(0,0,w,h); for(var i=0;i<parts.length;i++){ var p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.a = 0.25 + 0.18*Math.sin((i+Date.now()/1000)*0.5); if(p.y<-10||p.x<-50||p.x>w+50){ parts[i]=new P(); parts[i].y=h+10; } ctx.beginPath(); ctx.fillStyle='rgba(255,210,140,'+p.a+')'; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); } requestAnimationFrame(d); } d();
+  })();
+  </script>
+
+
+</body>
+</html>
